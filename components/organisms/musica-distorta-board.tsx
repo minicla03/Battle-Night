@@ -104,7 +104,7 @@ export function MusicaDistortaBoard({
           >
             Brano {songIndex + 1} / {totalSongs}
           </span>
-          <CountdownTimer seconds={timer} running={timerRunning} size="sm" />
+          <CountdownTimer seconds={timer} running={timerRunning} size="md" />
         </div>
 
         {/* Icon + wave in a row */}

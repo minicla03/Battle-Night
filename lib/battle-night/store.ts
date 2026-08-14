@@ -16,6 +16,8 @@ import {
   type Team,
 } from './types'
 
+const CHANNEL_NAME = 'battle-night:sync'
+
 function readState(): GameState {
   if (typeof window === 'undefined') return createInitialState()
   try {
@@ -36,9 +38,10 @@ function writeState(state: GameState) {
 
 /**
  * Read-only subscriber. Used by the DisplayPage.
- * Reacts to the window `storage` event, which fires in OTHER tabs/windows
- * when the AdminPage mutates localStorage — the exact cross-view sync we want.
- * Also listens for a same-tab custom event so previews inside one tab stay live.
+ * Listens for state changes via:
+ *   1. BroadcastChannel — instant same-browser cross-tab updates.
+ *   2. window `storage` event — cross-tab fallback (fires in OTHER tabs).
+ *   3. Polling every 1 s — universal fallback (e.g. different windows, edge cases).
  */
 export function useGameStateReader(): { state: GameState; hydrated: boolean } {
   const [state, setState] = useState<GameState>(() => ({
@@ -51,60 +54,41 @@ export function useGameStateReader(): { state: GameState; hydrated: boolean } {
     setState(readState())
     setHydrated(true)
 
-    // Ensure WebSocket server is started
-    fetch('/api/ws').catch(console.error)
-
-    let ws: WebSocket | null = null
-    let reconnectTimeout: NodeJS.Timeout
-
-    function connect() {
-      ws = new WebSocket(`ws://${window.location.hostname}:3001`)
-      
-      ws.onopen = () => {
-        console.log('[BN] Display WS connected')
+    // 1. BroadcastChannel — instant updates within the same browser
+    let channel: BroadcastChannel | null = null
+    try {
+      channel = new BroadcastChannel(CHANNEL_NAME)
+      channel.onmessage = (e: MessageEvent<GameState>) => {
+        setState(e.data)
+        writeState(e.data)
       }
-      
-      ws.onmessage = (event) => {
-        try {
-          const nextState = JSON.parse(event.data) as GameState
-          setState(nextState)
-          writeState(nextState) // Keep local storage in sync
-        } catch (e) {
-          console.error('[BN] WS parse error:', e)
-        }
-      }
-
-      ws.onclose = () => {
-        console.log('[BN] Display WS closed, reconnecting in 2s...')
-        reconnectTimeout = setTimeout(connect, 2000)
-      }
-      
-      ws.onerror = (err) => {
-        console.error('[BN] Display WS error:', err)
-        ws?.close()
-      }
+    } catch {
+      // BroadcastChannel not supported (very old browsers)
     }
-    
-    connect()
 
+    // 2. storage event — fires in OTHER tabs when localStorage changes
     const onStorage = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY) {
         setState(readState())
       }
     }
+
+    // 3. Same-tab custom event (dispatched by useGameController)
     const onLocal = () => setState(readState())
+
+    // 4. Polling fallback — 1 s interval
+    const pollInterval = setInterval(() => {
+      setState(readState())
+    }, 1000)
 
     window.addEventListener('storage', onStorage)
     window.addEventListener('battle-night:update', onLocal as EventListener)
-    
+
     return () => {
       window.removeEventListener('storage', onStorage)
       window.removeEventListener('battle-night:update', onLocal as EventListener)
-      clearTimeout(reconnectTimeout)
-      if (ws) {
-        ws.onclose = null
-        ws.close()
-      }
+      clearInterval(pollInterval)
+      channel?.close()
     }
   }, [])
 
@@ -113,8 +97,8 @@ export function useGameStateReader(): { state: GameState; hydrated: boolean } {
 
 /**
  * Read/write controller. Used by the AdminPage.
- * Every mutation persists to localStorage and dispatches a same-tab event
- * so an in-tab preview updates, while cross-tab sync flows via `storage`.
+ * Every mutation persists to localStorage, broadcasts via BroadcastChannel,
+ * and dispatches a same-tab event so in-tab previews update instantly.
  */
 export function useGameController() {
   const [state, setState] = useState<GameState>(() => ({
@@ -124,7 +108,7 @@ export function useGameController() {
   const [hydrated, setHydrated] = useState(false)
   const stateRef = useRef(state)
   stateRef.current = state
-  const wsRef = useRef<WebSocket | null>(null)
+  const channelRef = useRef<BroadcastChannel | null>(null)
 
   useEffect(() => {
     console.log('[BN] useGameController hydrating...')
@@ -132,58 +116,23 @@ export function useGameController() {
     setHydrated(true)
     console.log('[BN] useGameController hydrated, state:', readState())
 
-    // Ensure WebSocket server is started
-    fetch('/api/ws').catch(console.error)
-
-    let reconnectTimeout: NodeJS.Timeout
-
-    function connect() {
-      const ws = new WebSocket(`ws://${window.location.hostname}:3001`)
-      
-      ws.onopen = () => {
-        console.log('[BN] Admin WS connected')
-        wsRef.current = ws
-        // Invia lo stato attuale al server appena connesso, così il server
-        // ha l'ultimo stato da mandare ai Display che si connettono dopo
-        ws.send(JSON.stringify(readState()))
-      }
-      
-      ws.onmessage = (event) => {
-        try {
-          const nextState = JSON.parse(event.data) as GameState
-          setState(nextState)
-          writeState(nextState)
-        } catch (e) {
-          console.error('[BN] WS parse error:', e)
-        }
-      }
-
-      ws.onclose = () => {
-        console.log('[BN] Admin WS closed, reconnecting in 2s...')
-        wsRef.current = null
-        reconnectTimeout = setTimeout(connect, 2000)
-      }
-      
-      ws.onerror = (err) => {
-        console.error('[BN] Admin WS error:', err)
-        ws.close()
-      }
+    // Open BroadcastChannel for instant cross-tab sync
+    try {
+      channelRef.current = new BroadcastChannel(CHANNEL_NAME)
+    } catch {
+      // BroadcastChannel not supported
     }
-
-    connect()
 
     // Keep in sync if another admin tab makes changes.
     const onStorage = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY) setState(readState())
     }
     window.addEventListener('storage', onStorage)
+
     return () => {
       window.removeEventListener('storage', onStorage)
-      clearTimeout(reconnectTimeout)
-      if (wsRef.current) {
-        wsRef.current.onclose = null
-        wsRef.current.close()
-      }
+      channelRef.current?.close()
+      channelRef.current = null
     }
   }, [])
 
@@ -191,13 +140,10 @@ export function useGameController() {
     console.log('[BN] commit called, next state:', next)
     setState(next)
     writeState(next)
+    // Broadcast to other tabs/windows in the same browser
+    channelRef.current?.postMessage(next)
+    // Same-tab custom event so in-tab preview updates
     window.dispatchEvent(new Event('battle-night:update'))
-    
-    // Invia il nuovo stato tramite WebSocket
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify(next))
-    }
-    
     console.log('[BN] commit done, localStorage:', window.localStorage.getItem(STORAGE_KEY))
   }, [])
 
