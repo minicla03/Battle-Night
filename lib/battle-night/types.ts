@@ -175,14 +175,14 @@ export interface GhigliottinaSet {
 }
 
 export const GHIGLIOTTINA_SETS: GhigliottinaSet[] = [
-  { clues: ['Notte', 'Fuoco', 'Corsa', 'Vittoria', 'Squadra'],    solution: 'Campione' },
-  { clues: ['Luna', 'Sole', 'Mare', 'Vento', 'Terra'],            solution: 'Luce' },
-  { clues: ['Rosso', 'Verde', 'Blu', 'Giallo', 'Bianco'],         solution: 'Colore' },
-  { clues: ['Cane', 'Gatto', 'Uccello', 'Pesce', 'Coniglio'],    solution: 'Animale' },
-  { clues: ['Pasta', 'Pizza', 'Risotto', 'Lasagne', 'Polenta'],   solution: 'Piatto' },
-  { clues: ['Chitarra', 'Piano', 'Violino', 'Tromba', 'Flauto'],  solution: 'Musica' },
+  { clues: ['Notte', 'Fuoco', 'Corsa', 'Vittoria', 'Squadra'], solution: 'Campione' },
+  { clues: ['Luna', 'Sole', 'Mare', 'Vento', 'Terra'], solution: 'Luce' },
+  { clues: ['Rosso', 'Verde', 'Blu', 'Giallo', 'Bianco'], solution: 'Colore' },
+  { clues: ['Cane', 'Gatto', 'Uccello', 'Pesce', 'Coniglio'], solution: 'Animale' },
+  { clues: ['Pasta', 'Pizza', 'Risotto', 'Lasagne', 'Polenta'], solution: 'Piatto' },
+  { clues: ['Chitarra', 'Piano', 'Violino', 'Tromba', 'Flauto'], solution: 'Musica' },
   { clues: ['Primavera', 'Estate', 'Autunno', 'Inverno', 'Neve'], solution: 'Stagione' },
-  { clues: ['Roma', 'Milano', 'Napoli', 'Torino', 'Firenze'],     solution: 'Città' },
+  { clues: ['Roma', 'Milano', 'Napoli', 'Torino', 'Firenze'], solution: 'Città' },
 ]
 
 export interface DistortedSong {
@@ -190,21 +190,34 @@ export interface DistortedSong {
   artist: string
   year: number
   hint: string          // a vague hint shown to players, no spoilers
+  /** Filename in /public/songs/ (e.g. "01-albachiara.mp3") */
+  audioFile: string
+  /** Points awarded for correctly guessing this song */
+  points: number
 }
 
 export const DISTORTED_SONGS: DistortedSong[] = [
-  { title: 'Bohemian Rhapsody',      artist: 'Queen',              year: 1975, hint: 'Rock leggendario anni \'70' },
-  { title: 'Billie Jean',            artist: 'Michael Jackson',    year: 1982, hint: 'King of Pop anni \'80' },
-  { title: 'Smells Like Teen Spirit',artist: 'Nirvana',            year: 1991, hint: 'Grunge americano' },
-  { title: 'Shape of You',           artist: 'Ed Sheeran',         year: 2017, hint: 'Pop britannico anni \'10' },
-  { title: 'Volare',                 artist: 'Domenico Modugno',   year: 1958, hint: 'Classico italiano' },
-  { title: 'Uptown Funk',            artist: 'Bruno Mars',         year: 2014, hint: 'Funk pop moderno' },
-  { title: 'Azzurro',               artist: 'Adriano Celentano',  year: 1968, hint: 'Cantautore italiano' },
-  { title: 'Blinding Lights',        artist: 'The Weeknd',         year: 2019, hint: 'Synth-pop anni \'80 style' },
-  { title: 'Con Te Partirò',         artist: 'Andrea Bocelli',     year: 1995, hint: 'Opera italiana contemporanea' },
-  { title: 'Rolling in the Deep',    artist: 'Adele',              year: 2010, hint: 'Soul-pop britannico' },
-]
-
+  { title: 'Albachiara',          artist: 'Vasco Rossi',                   year: 1979, hint: 'Cantautorato rock italiano anni \'70', audioFile: '01-albachiara.mp3',       points: 3 },
+  { title: 'I Tuoi Particolari',  artist: 'Ultimo',                        year: 2019, hint: 'Pop italiano contemporaneo',           audioFile: '02-i-tuoi-particolari.mp3', points: 2 },
+  { title: 'Una Volta Ancora',    artist: 'Fred De Palma feat. Ana Mena',  year: 2019, hint: 'Reggaeton italiano',                  audioFile: '03-una-volta-ancora.mp3',   points: 2 },
+  { title: 'Tutta Colpa Mia',     artist: 'Elodie',                        year: 2017, hint: 'Pop R&B italiano',                    audioFile: '04-tutta-colpa-mia.mp3',    points: 3 },
+  { title: 'Cercavo Amore',       artist: 'Emma',                          year: 2012, hint: 'Pop italiano contemporaneo',           audioFile: '05-cercavo-amore.mp3',      points: 3 },
+  { title: 'Désolé',              artist: 'Anna Pepe',                      year: 2020, hint: 'Urban pop italiano',                  audioFile: '06-desole.mp3',             points: 4 },
+  { title: 'La Prima Volta',      artist: 'Negramaro',                     year: 2006, hint: 'Rock alternativo pugliese',            audioFile: '07-la-prima-volta.mp3',     points: 4 },
+  { title: 'Sinceramente',        artist: 'Annalisa',                      year: 2024, hint: 'Pop elettronico italiano',             audioFile: '08-sinceramente.mp3',       points: 1 },
+  { title: 'Dove e Quando',       artist: 'Benji & Fede',                  year: 2019, hint: 'Pop duo italiano',                    audioFile: '09-dove-e-quando.mp3',      points: 3 },
+  { title: 'Filo Rosso',          artist: 'Alfa',                          year: 2024, hint: 'Indie pop generazione Z',             audioFile: '10-filo-rosso.mp3',         points: 4 },
+  { title: 'Tuta Gold',           artist: 'Mahmood',                       year: 2024, hint: 'Urban pop italiano',                  audioFile: '11-tuta-gold.mp3',          points: 2 },
+  { title: 'Notti in bianco',     artist: 'BLANCO',                        year: 2021, hint: 'Pop urban italiano',                  audioFile: '12-notti-in-bianco.mp3',    points: 3 },
+  { title: 'Insuperabile',        artist: 'Rkomi',                         year: 2022, hint: 'Pop rap italiano',                    audioFile: '13-insuperabile.mp3',       points: 4 },
+  { title: 'Laura Non C\'\u00e8',    artist: 'Nek',                           year: 1997, hint: 'Pop italiano anni \'90',             audioFile: '14-laura-non-ce.mp3',       points: 5 },
+  { title: 'Vai!',                artist: 'Alfa',                          year: 2022, hint: 'Indie pop giovane',                   audioFile: '15-vai.mp3',                points: 3 },
+  { title: 'Scrivile Scemo',      artist: 'Pinguini Tattici Nucleari',     year: 2020, hint: 'Pop rock italiano',                   audioFile: '16-scrivile-scemo.mp3',     points: 3 },
+  { title: 'D\'estate non vale',   artist: 'Fred De Palma feat. Ana Mena',  year: 2018, hint: 'Latin pop italiano estivo',           audioFile: '17-destate-non-vale.mp3',   points: 2 },
+  { title: 'Tango',               artist: 'Tananai',                       year: 2023, hint: 'Pop italiano contemporaneo',           audioFile: '18-tango.mp3',              points: 2 },
+  { title: 'Malibu',              artist: 'Sangiovanni',                   year: 2021, hint: 'Pop italiano estivo',                 audioFile: '19-malibu.mp3',             points: 4 },
+  { title: 'Cenere',              artist: 'Lazza',                         year: 2023, hint: 'Rap italiano da festival',            audioFile: '20-cenere.mp3',             points: 5 },
+];
 export interface GameState {
   currentPhase: Phase
   scores: Record<Team, number>
@@ -224,6 +237,10 @@ export interface GameState {
   musicaIndex: number
   /** Whether the answer (title + artist) is revealed on screen */
   musicaRevealed: boolean
+  /** Whether the admin audio player is currently playing */
+  musicaPlaying: boolean
+  /** Admin audio player volume (0–1) */
+  musicaVolume: number
 }
 
 export const STORAGE_KEY = 'battleNightState'
@@ -259,5 +276,7 @@ export function createInitialState(): GameState {
     ghigliottinaSetIndex: 0,
     musicaIndex: 0,
     musicaRevealed: false,
+    musicaPlaying: false,
+    musicaVolume: 0.8,
   }
 }

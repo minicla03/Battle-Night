@@ -260,14 +260,17 @@ export function useGameController() {
   // --- Musica Distorta controls ---
   const nextMusica = useCallback(() => {
     const next = (stateRef.current.musicaIndex + 1) % DISTORTED_SONGS.length
-    update({ musicaIndex: next, musicaRevealed: false })
+    update({ musicaIndex: next, musicaRevealed: false, musicaPlaying: false })
   }, [update])
   const prevMusica = useCallback(() => {
     const prev = (stateRef.current.musicaIndex - 1 + DISTORTED_SONGS.length) % DISTORTED_SONGS.length
-    update({ musicaIndex: prev, musicaRevealed: false })
+    update({ musicaIndex: prev, musicaRevealed: false, musicaPlaying: false })
   }, [update])
   const revealMusica = useCallback(() => update({ musicaRevealed: true }), [update])
   const hideMusica = useCallback(() => update({ musicaRevealed: false }), [update])
+  const playMusica = useCallback(() => update({ musicaPlaying: true }), [update])
+  const pauseMusica = useCallback(() => update({ musicaPlaying: false }), [update])
+  const setMusicaVolume = useCallback((v: number) => update({ musicaVolume: v }), [update])
 
   const resetGame = useCallback(() => commit(createInitialState()), [commit])
 
@@ -298,6 +301,9 @@ export function useGameController() {
     prevMusica,
     revealMusica,
     hideMusica,
+    playMusica,
+    pauseMusica,
+    setMusicaVolume,
     resetGame,
   }
 }

@@ -47,21 +47,6 @@ export default function Home() {
           </NeonTitle>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          {TEAMS.map((team) => (
-            <span
-              key={team}
-              className="rounded-full border px-4 py-1.5 font-display text-sm font-semibold uppercase tracking-wide"
-              style={{
-                color: `var(--color-${TEAM_TOKENS[team]})`,
-                borderColor: `color-mix(in oklch, var(--color-${TEAM_TOKENS[team]}) 55%, transparent)`,
-              }}
-            >
-              {team}
-            </span>
-          ))}
-        </div>
-
         <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
           <Link
             href="/admin"

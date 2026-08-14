@@ -170,6 +170,41 @@ export function MusicaDistortaBoard({
             </>
           )}
         </div>
+
+        {/* Points badge */}
+        {revealed ? (
+          <div
+            className="flex items-center gap-2 rounded-2xl px-5 py-2 font-display font-black"
+            style={{
+              background: 'color-mix(in oklch, var(--color-accent) 18%, transparent)',
+              border: '1.5px solid color-mix(in oklch, var(--color-accent) 55%, transparent)',
+              boxShadow: '0 0 24px color-mix(in oklch, var(--color-accent) 35%, transparent)',
+              color: 'var(--color-accent)',
+              fontSize: '1.5rem',
+            }}
+          >
+            <span>+{song.points}</span>
+            <span className="text-sm font-semibold" style={{ opacity: 0.8 }}>
+              {song.points === 1 ? 'punto' : 'punti'}
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <span
+                key={i}
+                style={{
+                  fontSize: '1rem',
+                  opacity: i < song.points ? 1 : 0.2,
+                  color: 'var(--color-primary)',
+                  filter: i < song.points ? 'drop-shadow(0 0 4px var(--color-primary))' : 'none',
+                }}
+              >
+                ★
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </PhaseShell>
   )

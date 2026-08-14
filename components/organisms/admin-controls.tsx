@@ -29,14 +29,113 @@ import {
   RotateCcw,
   Scissors,
   Shuffle,
+  Square,
   Timer,
   Trophy,
+  Volume2,
 } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 
 type Controller = ReturnType<typeof useGameController>
 
-const SCORE_DELTAS = [1, 5, 10]
+const SCORE_DELTAS = [1, 2, 5, 10, 25, 50]
 const TIMER_PRESETS = [15, 30, 45, 60, 90, 120, 180]
+
+/** Audio player wired to the Musica Distorta section */
+function MusicaAudioPlayer({ ctrl }: { ctrl: Controller }) {
+  const { state } = ctrl
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const song = DISTORTED_SONGS[state.musicaIndex]
+  const src = `/songs/${song.audioFile}`
+
+  // When song changes: reload the audio element and reset
+  useEffect(() => {
+    const el = audioRef.current
+    if (!el) return
+    el.pause()
+    el.load()
+    // If playing was requested before song change it got reset to false in store
+  }, [state.musicaIndex])
+
+  // Sync play/pause state from store
+  useEffect(() => {
+    const el = audioRef.current
+    if (!el) return
+    if (state.musicaPlaying) {
+      el.play().catch(() => {
+        // autoplay blocked — silently fail, user needs to interact first
+        ctrl.pauseMusica()
+      })
+    } else {
+      el.pause()
+    }
+  }, [state.musicaPlaying]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Sync volume from store
+  useEffect(() => {
+    const el = audioRef.current
+    if (!el) return
+    el.volume = state.musicaVolume
+  }, [state.musicaVolume])
+
+  const handleStop = () => {
+    const el = audioRef.current
+    if (el) { el.pause(); el.currentTime = 0 }
+    ctrl.pauseMusica()
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      {/* Hidden audio element */}
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      <audio ref={audioRef} src={src} preload="auto" onEnded={() => ctrl.pauseMusica()} />
+
+      {/* File badge */}
+      <div className="flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2">
+        <Music className="h-4 w-4 shrink-0" style={{ color: 'var(--color-primary)' }} />
+        <span className="truncate text-xs font-mono text-muted-foreground">{song.audioFile}</span>
+      </div>
+
+      {/* Transport controls */}
+      <div className="flex items-center gap-2">
+        {state.musicaPlaying ? (
+          <ControlButton variant="neutral" onClick={ctrl.pauseMusica}>
+            <Pause className="h-4 w-4" /> Pausa
+          </ControlButton>
+        ) : (
+          <ControlButton variant="accent" onClick={ctrl.playMusica}>
+            <Play className="h-4 w-4" /> Riproduci
+          </ControlButton>
+        )}
+        <ControlButton variant="ghost" onClick={handleStop}>
+          <Square className="h-4 w-4" /> Stop
+        </ControlButton>
+      </div>
+
+      {/* Volume slider */}
+      <div className="flex items-center gap-3">
+        <Volume2 className="h-4 w-4 shrink-0" style={{ color: 'var(--color-muted-foreground)' }} />
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          value={state.musicaVolume}
+          onChange={(e) => ctrl.setMusicaVolume(Number(e.target.value))}
+          className="h-1.5 w-full cursor-pointer appearance-none rounded-full"
+          style={{
+            background: `linear-gradient(to right, var(--color-accent) ${state.musicaVolume * 100}%, color-mix(in oklch, var(--color-border) 60%, transparent) ${state.musicaVolume * 100}%)`,
+            accentColor: 'var(--color-accent)',
+          }}
+          aria-label="Volume"
+        />
+        <span className="w-8 text-right text-xs font-semibold tabular-nums text-muted-foreground">
+          {Math.round(state.musicaVolume * 100)}%
+        </span>
+      </div>
+    </div>
+  )
+}
 
 export function AdminControls({ ctrl }: { ctrl: Controller }) {
   const { state } = ctrl
@@ -141,18 +240,6 @@ export function AdminControls({ ctrl }: { ctrl: Controller }) {
               <div className="flex flex-wrap items-center justify-end gap-1.5">
                 {SCORE_DELTAS.map((d) => (
                   <ControlButton
-                    key={`minus-${d}`}
-                    size="sm"
-                    variant="ghost"
-                    aria-label={`Rimuovi ${d} punti a ${team}`}
-                    onClick={() => ctrl.changeScore(team, -d)}
-                  >
-                    <Minus className="h-3 w-3" />
-                    {d}
-                  </ControlButton>
-                ))}
-                {SCORE_DELTAS.map((d) => (
-                  <ControlButton
                     key={`plus-${d}`}
                     size="sm"
                     variant="accent"
@@ -175,7 +262,8 @@ export function AdminControls({ ctrl }: { ctrl: Controller }) {
         icon={<Music className="h-4 w-4" />}
         className="xl:col-span-2"
       >
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
+          {/* Navigation row */}
           <div className="flex items-center justify-between">
             <span className="rounded-full bg-primary/15 px-3 py-0.5 text-xs font-bold uppercase tracking-widest text-primary">
               Brano {state.musicaIndex + 1} / {DISTORTED_SONGS.length}
@@ -189,17 +277,39 @@ export function AdminControls({ ctrl }: { ctrl: Controller }) {
               </ControlButton>
             </div>
           </div>
+
+          {/* Song info card */}
           <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              {DISTORTED_SONGS[state.musicaIndex].hint}
-            </p>
-            <p className="font-display text-xl font-bold text-foreground">
-              {DISTORTED_SONGS[state.musicaIndex].title}
-            </p>
-            <p className="text-sm font-semibold" style={{ color: 'var(--color-accent)' }}>
-              {DISTORTED_SONGS[state.musicaIndex].artist} · {DISTORTED_SONGS[state.musicaIndex].year}
-            </p>
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex flex-col">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                  {DISTORTED_SONGS[state.musicaIndex].hint}
+                </p>
+                <p className="font-display text-xl font-bold text-foreground">
+                  {DISTORTED_SONGS[state.musicaIndex].title}
+                </p>
+                <p className="text-sm font-semibold" style={{ color: 'var(--color-accent)' }}>
+                  {DISTORTED_SONGS[state.musicaIndex].artist} · {DISTORTED_SONGS[state.musicaIndex].year}
+                </p>
+              </div>
+              <div
+                className="flex shrink-0 flex-col items-center rounded-xl px-3 py-1.5"
+                style={{
+                  background: 'color-mix(in oklch, var(--color-accent) 15%, transparent)',
+                  border: '1px solid color-mix(in oklch, var(--color-accent) 40%, transparent)',
+                }}
+              >
+                <span className="font-display text-2xl font-black" style={{ color: 'var(--color-accent)' }}>
+                  +{DISTORTED_SONGS[state.musicaIndex].points}
+                </span>
+                <span className="text-xs font-semibold text-muted-foreground">
+                  {DISTORTED_SONGS[state.musicaIndex].points === 1 ? 'punto' : 'punti'}
+                </span>
+              </div>
+            </div>
           </div>
+
+          {/* Reveal controls */}
           <div className="flex gap-2">
             {state.musicaRevealed ? (
               <ControlButton variant="neutral" onClick={ctrl.hideMusica}>
@@ -210,6 +320,20 @@ export function AdminControls({ ctrl }: { ctrl: Controller }) {
                 <Eye className="h-4 w-4" /> Rivela risposta
               </ControlButton>
             )}
+          </div>
+
+          {/* Audio player */}
+          <div
+            className="rounded-xl border px-4 py-3"
+            style={{
+              borderColor: 'color-mix(in oklch, var(--color-primary) 25%, transparent)',
+              background: 'color-mix(in oklch, var(--color-primary) 4%, transparent)',
+            }}
+          >
+            <p className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-primary)' }}>
+              🎵 Player Audio (Admin)
+            </p>
+            <MusicaAudioPlayer ctrl={ctrl} />
           </div>
         </div>
       </ControlPanel>
