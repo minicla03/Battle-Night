@@ -1,0 +1,121 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Team colors */
+  --color-team-vip: var(--team-vip);
+  --color-team-intellettuali: var(--team-intellettuali);
+  --color-team-festaioli: var(--team-festaioli);
+  --color-team-dormiglioni: var(--team-dormiglioni);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-inter), sans-serif;
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+:root {
+  color-scheme: dark;
+
+  /* Neutrals (deep space blacks / grays) */
+  --background: oklch(0.12 0.02 275);
+  --foreground: oklch(0.97 0.01 275);
+  --card: oklch(0.17 0.03 275);
+  --card-foreground: oklch(0.97 0.01 275);
+  --popover: oklch(0.17 0.03 275);
+  --popover-foreground: oklch(0.97 0.01 275);
+
+  /* Primary: neon purple */
+  --primary: oklch(0.62 0.26 305);
+  --primary-foreground: oklch(0.99 0 0);
+
+  /* Secondary: dark panel */
+  --secondary: oklch(0.22 0.04 275);
+  --secondary-foreground: oklch(0.97 0.01 275);
+
+  --muted: oklch(0.22 0.03 275);
+  --muted-foreground: oklch(0.68 0.03 275);
+
+  /* Accent: neon blue */
+  --accent: oklch(0.68 0.19 245);
+  --accent-foreground: oklch(0.12 0.02 275);
+
+  --destructive: oklch(0.62 0.24 15);
+  --destructive-foreground: oklch(0.99 0 0);
+
+  --border: oklch(0.3 0.04 275);
+  --input: oklch(0.24 0.04 275);
+  --ring: oklch(0.62 0.26 305);
+
+  --radius: 0.75rem;
+
+  /* Team accent colors */
+  --team-vip: oklch(0.72 0.19 55);          /* gold */
+  --team-intellettuali: oklch(0.68 0.19 245); /* blue */
+  --team-festaioli: oklch(0.66 0.25 350);   /* pink/magenta */
+  --team-dormiglioni: oklch(0.72 0.16 175); /* teal */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Neon glow helpers */
+@layer utilities {
+  .neon-glow-primary {
+    text-shadow:
+      0 0 8px oklch(0.62 0.26 305 / 0.7),
+      0 0 24px oklch(0.62 0.26 305 / 0.5),
+      0 0 48px oklch(0.62 0.26 305 / 0.3);
+  }
+  .neon-glow-accent {
+    text-shadow:
+      0 0 8px oklch(0.68 0.19 245 / 0.7),
+      0 0 24px oklch(0.68 0.19 245 / 0.5),
+      0 0 48px oklch(0.68 0.19 245 / 0.3);
+  }
+  .neon-box-primary {
+    box-shadow:
+      0 0 12px oklch(0.62 0.26 305 / 0.5),
+      0 0 32px oklch(0.62 0.26 305 / 0.25),
+      inset 0 0 12px oklch(0.62 0.26 305 / 0.15);
+  }
+  .neon-box-accent {
+    box-shadow:
+      0 0 12px oklch(0.68 0.19 245 / 0.5),
+      0 0 32px oklch(0.68 0.19 245 / 0.25),
+      inset 0 0 12px oklch(0.68 0.19 245 / 0.15);
+  }
+}
