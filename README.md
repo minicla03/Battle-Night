@@ -1,6 +1,6 @@
 # 🌙 Battle Night
 
-> **Dashboard live per game show** — Pannello di controllo e display pubblico per la serata a quiz *Battle Night*.
+> **Dashboard live per game show** — Pannello di controllo e display pubblico per la serata a quiz *Battle Night*, ispirato allo stile di **Ciao Darwin**.
 
 Battle Night è un'applicazione web full-stack costruita con **Next.js 16**, progettata per condurre una serata di giochi a squadre in tempo reale. Il conduttore gestisce tutto dal pannello **Regia**, mentre il pubblico segue l'andamento dalla schermata **Display** proiettata su schermo.
 
@@ -13,26 +13,46 @@ Battle Night è un'applicazione web full-stack costruita con **Next.js 16**, pro
 - Gestione punteggi per ciascuna squadra (incremento/decremento)
 - Timer configurabile con avvio, pausa e reset
 - Controllo del montepremi (dimezzamento / reset a € 200.000)
+- **Presentazione squadre in Intro**: rivela ogni squadra una per volta tramite pulsante, stile TV show
 - Controlli specifici per ogni manche
 
 ### 📺 Display Pubblico (`/display`)
-- Vista a schermo intero per la proiezione al pubblico
+- Vista a schermo intero con effetto **scanline TV** per un look cinematografico
 - Si sincronizza automaticamente con la Regia tramite **BroadcastChannel**, evento `storage` e polling di fallback (1 s)
 - Senza bisogno di WebSocket o server dedicato — comunicazione 100% lato client
+- Header con indicatore **🔴 On Air** e nome della fase corrente
 
 ---
 
 ## 🎮 Fasi di Gioco
 
-| Fase | Nome | Descrizione |
-|------|------|-------------|
-| 1 | **Intro** | Schermata di benvenuto |
-| 2 | **Le Squadre** | Presentazione delle quattro squadre in gara |
+| # | Fase | Descrizione |
+|---|------|-------------|
+| 1 | **Intro** | Schermata di benvenuto con presentazione animata delle squadre (una per volta, controllata dalla Regia) |
+| 2 | **Le Squadre** | Classifica con layout VS stile ring — punteggi in primo piano |
 | 3 | **Musica Distorta** | Indovina il brano musicale nascosto |
 | 4 | **L'Intesa Vincente** | Due squadre, una parola da indovinare a gesti |
 | 5 | **La Ghigliottina** | Trova la parola che collega cinque indizi |
 | 6 | **Il Bruco** | Gara a catena di parole |
-| 7 | **L'Inversione Logica** | 14 step di domande a risposta binaria |
+| 7 | **Il Finalista** ⭐ | Reveal drammatico della squadra con più punti, che accede al gioco finale |
+| 8 | **L'Inversione Logica** | 14 step di domande a risposta binaria — il gioco finale |
+
+### 🎬 Intro — Presentazione Squadre
+- Il titolo **Battle Night** appare subito al pubblico
+- La Regia preme **"Rivela squadra"** per mostrare ogni team uno per uno con animazione spring
+- Ogni card mostra emoji, nome, slogan e colore della squadra
+- Pulsante Reset per ripetere la presentazione
+
+### 🎯 Classifica — Layout VS
+- Matchup **VIP vs INTELLETTUALI** e **FESTAIOLI vs DORMIGLIONI** visualizzati stile Ciao Darwin
+- Il team in testa ha il badge 👑 Leader e glow potenziato
+- Punteggi grandi e prominenti come elemento principale
+
+### ⭐ Il Finalista
+- Schermata di transizione prima del gioco finale
+- **Drumroll animato** (2 s) con pallini pulsanti
+- **Reveal drammatico** della squadra vincente con: emoji gigante fluttuante, nome in neon, punteggio in cifrone, glow pulsante
+- Gestione automatica del **pareggio** (mostra tutte le squadre a pari merito)
 
 ### 🎵 Musica Distorta
 - 20 brani italiani con file audio in `/public/songs/`
@@ -45,7 +65,7 @@ Battle Night è un'applicazione web full-stack costruita con **Next.js 16**, pro
 - Avanzamento parola con rimescolamento automatico a fine lista
 
 ### 🔪 La Ghigliottina
-- 8 set di indizi predefiniti, navigabili avanti e indietro
+- 30+ set di indizi predefiniti, navigabili avanti e indietro
 
 ### 🐛 Il Bruco
 - Registrazione dell'ordine di arrivo delle squadre
@@ -57,12 +77,31 @@ Battle Night è un'applicazione web full-stack costruita con **Next.js 16**, pro
 
 ## 👥 Squadre
 
-| Token | Nome |
-|-------|------|
-| `team-vip` | Vip |
-| `team-intellettuali` | Intellettuali |
-| `team-festaioli` | Festaioli |
-| `team-dormiglioni` | Dormiglioni |
+| Emoji | Nome | Slogan | Colore |
+|-------|------|--------|--------|
+| 👑 | **Vip** | *"Classe, stile e nessun compromesso"* | Oro caldo |
+| 🧠 | **Intellettuali** | *"La cultura è la nostra arma"* | Blu elettrico |
+| 🎉 | **Festaioli** | *"Se c'è musica, ci siamo noi"* | Magenta hot |
+| 💤 | **Dormiglioni** | *"Dormiamo, ma quando ci svegliamo…"* | Teal neon |
+
+### Matchup
+
+```
+VIP  ⚡  INTELLETTUALI
+FESTAIOLI  ⚡  DORMIGLIONI
+```
+
+---
+
+## 🎨 Design
+
+L'interfaccia è ispirata all'estetica dei game show televisivi italiani (stile **Ciao Darwin**):
+
+- **Dark mode** con palette neon vivida per ogni squadra
+- **Neon glow** su testi e bordi con colori specifici per team
+- **Effetto scanline TV** sul display pubblico
+- **Animazioni**: `floatA/B` per particelle, `vsPulse` per il divisore VS, `fadeInUp` per le rivelazioni
+- **Typography**: Space Grotesk (display) + Inter (corpo testo)
 
 ---
 
@@ -96,7 +135,7 @@ Lo stato di gioco viene persistito in **localStorage** e propagato in tempo real
 
 ```bash
 # Clona il repository
-git clone https://github.com/<tuo-utente>/battle-night.git
+git clone https://github.com/minicla03/Battle-Night.git
 cd battle-night
 
 # Installa le dipendenze
@@ -134,25 +173,28 @@ battle-night/
 ├── app/
 │   ├── admin/          # Pagina Regia (/admin)
 │   ├── display/        # Pagina Display pubblico (/display)
-│   ├── globals.css     # Stili globali e design system
+│   ├── globals.css     # Stili globali, design system e animazioni
 │   ├── layout.tsx      # Layout radice
 │   └── page.tsx        # Homepage con link a Regia e Display
 ├── components/
-│   ├── atoms/          # Componenti primitivi (NeonTitle, ecc.)
-│   ├── molecules/      # Componenti composti
+│   ├── atoms/          # Componenti primitivi (NeonTitle, ScoreBadge, ecc.)
+│   ├── molecules/      # Componenti composti (TeamScoreCard, Scoreboard, ecc.)
 │   ├── organisms/      # Blocchi UI complessi per fase
 │   │   ├── admin-controls.tsx          # Pannello di controllo Regia
+│   │   ├── intro-board.tsx             # Board Intro (presentazione squadre)
+│   │   ├── teams-board.tsx             # Board classifica (layout VS)
 │   │   ├── musica-distorta-board.tsx   # Board Musica Distorta
 │   │   ├── intesa-vincente-board.tsx   # Board Intesa Vincente
 │   │   ├── ghigliottina-board.tsx      # Board Ghigliottina
 │   │   ├── bruco-board.tsx             # Board Bruco
+│   │   ├── finalista-board.tsx         # Board reveal finalista ⭐
 │   │   ├── inversione-logica-grid.tsx  # Grid Inversione Logica
 │   │   ├── phase-renderer.tsx          # Selettore di fase
 │   │   └── phase-shell.tsx             # Shell con header di fase
 │   └── pages/          # Componenti pagina completi
 ├── lib/
 │   └── battle-night/
-│       ├── types.ts    # Tipi, costanti, domande e brani
+│       ├── types.ts    # Tipi, costanti, squadre, domande e brani
 │       └── store.ts    # Hook di stato (useGameController, useGameStateReader)
 └── public/
     └── songs/          # File audio MP3 per Musica Distorta
