@@ -1,4 +1,6 @@
-import React from 'react'
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
 import { BrucoBoard } from '@/components/organisms/bruco-board'
 import { FinalistaBoard } from '@/components/organisms/finalista-board'
 import { GhigliottinaBoard } from '@/components/organisms/ghigliottina-board'
@@ -7,21 +9,18 @@ import { IntroBoard } from '@/components/organisms/intro-board'
 import { InversioneLogicaGrid } from '@/components/organisms/inversione-logica-grid'
 import { MusicaDistortaBoard } from '@/components/organisms/musica-distorta-board'
 import { TeamsBoard } from '@/components/organisms/teams-board'
-import type { GameState } from '@/lib/battle-night/types'
+import type { GameState, Phase } from '@/lib/battle-night/types'
 import { DISTORTED_SONGS, GHIGLIOTTINA_SETS } from '@/lib/battle-night/types'
 
-export function PhaseRenderer({ state }: { state: GameState }) {
-  let content: React.ReactNode
-
+/** Render the right board for the given phase */
+function renderBoard(state: GameState) {
   switch (state.currentPhase) {
     case 'INTRO':
-      content = <IntroBoard introRevealStep={state.introRevealStep} />
-      break
+      return <IntroBoard introRevealStep={state.introRevealStep} />
     case 'TEAMS':
-      content = <TeamsBoard scores={state.scores} />
-      break
+      return <TeamsBoard scores={state.scores} />
     case 'MUSICA_DISTORTA':
-      content = (
+      return (
         <MusicaDistortaBoard
           timer={state.timer}
           timerRunning={state.timerRunning}
@@ -31,9 +30,8 @@ export function PhaseRenderer({ state }: { state: GameState }) {
           revealed={state.musicaRevealed}
         />
       )
-      break
     case 'INTESA_VINCENTE':
-      content = (
+      return (
         <IntesaVincenteBoard
           timer={state.timer}
           timerRunning={state.timerRunning}
@@ -42,40 +40,96 @@ export function PhaseRenderer({ state }: { state: GameState }) {
           totalWords={state.intesaWords.length}
         />
       )
-      break
     case 'GHIGLIOTTINA':
-      content = (
+      return (
         <GhigliottinaBoard
           currentSet={GHIGLIOTTINA_SETS[state.ghigliottinaSetIndex]}
           setIndex={state.ghigliottinaSetIndex}
           totalSets={GHIGLIOTTINA_SETS.length}
+          timer={state.timer}
+          timerRunning={state.timerRunning}
         />
       )
-      break
     case 'BRUCO':
-      content = (
+      return (
         <BrucoBoard
           timer={state.timer}
           timerRunning={state.timerRunning}
           finishOrder={state.brucoFinishOrder}
         />
       )
-      break
     case 'FINALISTA':
-      content = <FinalistaBoard scores={state.scores} />
-      break
+      return <FinalistaBoard scores={state.scores} />
     case 'INVERSIONE_LOGICA':
-      content = (
+      return (
         <InversioneLogicaGrid
           logicStep={state.logicStep}
           timer={state.timer}
           timerRunning={state.timerRunning}
         />
       )
-      break
     default:
-      content = <IntroBoard introRevealStep={state.introRevealStep} />
+      return <IntroBoard introRevealStep={state.introRevealStep} />
   }
+}
 
-  return <div className="flex h-full w-full items-center justify-center">{content}</div>
+type TransitionState = 'idle' | 'exiting' | 'entering'
+
+const TRANSITION_MS = 350 // ms for each half
+
+export function PhaseRenderer({ state }: { state: GameState }) {
+  // The phase whose content is currently *visible* on screen
+  const [visibleState, setVisibleState] = useState<GameState>(state)
+  const [transition, setTransition] = useState<TransitionState>('idle')
+  const pendingRef = useRef<GameState | null>(null)
+
+  useEffect(() => {
+    // Only animate when the phase changes (not on every state update)
+    if (state.currentPhase === visibleState.currentPhase) {
+      // Same phase — update visible state immediately (scores, timer, etc.)
+      setVisibleState(state)
+      return
+    }
+
+    // Phase changed → start exit animation, then swap content, then enter
+    pendingRef.current = state
+    setTransition('exiting')
+
+    const exitTimer = setTimeout(() => {
+      // Swap to the new phase content (invisible during blur)
+      if (pendingRef.current) setVisibleState(pendingRef.current)
+      setTransition('entering')
+
+      const enterTimer = setTimeout(() => {
+        setTransition('idle')
+      }, TRANSITION_MS)
+
+      return () => clearTimeout(enterTimer)
+    }, TRANSITION_MS)
+
+    return () => clearTimeout(exitTimer)
+  }, [state.currentPhase]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keep non-phase fields in sync without triggering animations
+  useEffect(() => {
+    if (transition === 'idle' && state.currentPhase === visibleState.currentPhase) {
+      setVisibleState(state)
+    }
+  }, [state]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const animationStyle: React.CSSProperties =
+    transition === 'exiting'
+      ? { animation: `phaseOut ${TRANSITION_MS}ms ease-in-out both` }
+      : transition === 'entering'
+        ? { animation: `phaseIn ${TRANSITION_MS}ms ease-out both` }
+        : {}
+
+  return (
+    <div
+      className="flex h-full w-full items-center justify-center"
+      style={animationStyle}
+    >
+      {renderBoard(visibleState)}
+    </div>
+  )
 }

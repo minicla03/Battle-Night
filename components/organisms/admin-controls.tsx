@@ -41,7 +41,7 @@ import { useEffect, useRef } from 'react'
 type Controller = ReturnType<typeof useGameController>
 
 const SCORE_DELTAS = [1, 2, 5, 10, 25, 50]
-const TIMER_PRESETS = [15, 30, 45, 60, 90, 120, 180]
+const TIMER_PRESETS = [15, 30, 45, 60, 90, 120, 180, 300]
 
 /** Audio player wired to the Musica Distorta section */
 function MusicaAudioPlayer({ ctrl }: { ctrl: Controller }) {
@@ -263,17 +263,22 @@ export function AdminControls({ ctrl }: { ctrl: Controller }) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {TIMER_PRESETS.map((s) => (
-            <ControlButton
-              key={s}
-              size="sm"
-              variant="ghost"
-              onClick={() => ctrl.resetTimer(s)}
-            >
-              <RotateCcw className="h-3 w-3" />
-              {s}s
-            </ControlButton>
-          ))}
+          {TIMER_PRESETS.map((s) => {
+              const label = s >= 60
+                ? `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`
+                : `${s}s`
+              return (
+                <ControlButton
+                  key={s}
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => ctrl.resetTimer(s)}
+                >
+                  <RotateCcw className="h-3 w-3" />
+                  {label}
+                </ControlButton>
+              )
+            })}
         </div>
       </ControlPanel>
 

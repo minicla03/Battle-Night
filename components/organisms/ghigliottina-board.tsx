@@ -1,3 +1,4 @@
+import { CountdownTimer } from '@/components/molecules/countdown-timer'
 import { PhaseShell } from '@/components/organisms/phase-shell'
 import type { GhigliottinaSet } from '@/lib/battle-night/types'
 
@@ -5,6 +6,8 @@ interface GhigliottinaBoardProps {
   currentSet: GhigliottinaSet
   setIndex: number
   totalSets: number
+  timer: number
+  timerRunning: boolean
 }
 
 const ACCENT_COLORS = [
@@ -15,7 +18,7 @@ const ACCENT_COLORS = [
   'var(--color-primary)',
 ]
 
-export function GhigliottinaBoard({ currentSet, setIndex, totalSets }: GhigliottinaBoardProps) {
+export function GhigliottinaBoard({ currentSet, setIndex, totalSets, timer, timerRunning }: GhigliottinaBoardProps) {
   return (
     <PhaseShell
       title="La Ghigliottina"
@@ -41,6 +44,9 @@ export function GhigliottinaBoard({ currentSet, setIndex, totalSets }: Ghigliott
       <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
         Set {setIndex + 1} / {totalSets}
       </p>
+
+      {/* Timer */}
+      <CountdownTimer seconds={timer} running={timerRunning} size="md" />
     </PhaseShell>
   )
 }
