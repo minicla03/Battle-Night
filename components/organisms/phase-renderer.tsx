@@ -1,5 +1,6 @@
 import React from 'react'
 import { BrucoBoard } from '@/components/organisms/bruco-board'
+import { FinalistaBoard } from '@/components/organisms/finalista-board'
 import { GhigliottinaBoard } from '@/components/organisms/ghigliottina-board'
 import { IntesaVincenteBoard } from '@/components/organisms/intesa-vincente-board'
 import { IntroBoard } from '@/components/organisms/intro-board'
@@ -59,6 +60,9 @@ export function PhaseRenderer({ state }: { state: GameState }) {
           finishOrder={state.brucoFinishOrder}
         />
       )
+      break
+    case 'FINALISTA':
+      content = <FinalistaBoard scores={state.scores} />
       break
     case 'INVERSIONE_LOGICA':
       content = (

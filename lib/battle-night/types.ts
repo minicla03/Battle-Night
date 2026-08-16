@@ -5,6 +5,7 @@ export const PHASES = [
   'INTESA_VINCENTE',
   'GHIGLIOTTINA',
   'BRUCO',
+  'FINALISTA',
   'INVERSIONE_LOGICA',
 ] as const
 
@@ -17,6 +18,7 @@ export const PHASE_LABELS: Record<Phase, string> = {
   INTESA_VINCENTE: "L'Intesa Vincente",
   GHIGLIOTTINA: 'La Ghigliottina',
   BRUCO: 'Il Bruco',
+  FINALISTA: 'Il Finalista',
   INVERSIONE_LOGICA: "L'Inversione Logica",
 }
 
@@ -27,6 +29,7 @@ export const PHASE_SUBTITLES: Record<Phase, string> = {
   INTESA_VINCENTE: 'Due menti, una sola parola',
   GHIGLIOTTINA: 'La parola che unisce tutte',
   BRUCO: 'La catena di parole non si spezza',
+  FINALISTA: 'La squadra che va alla finale',
   INVERSIONE_LOGICA: 'Quattordici passi verso la vittoria',
 }
 
