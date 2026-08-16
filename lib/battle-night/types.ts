@@ -46,6 +46,33 @@ export const TEAM_TOKENS: Record<Team, string> = {
   Dormiglioni: 'team-dormiglioni',
 }
 
+export const TEAM_EMOJI: Record<Team, string> = {
+  Vip: '👑',
+  Intellettuali: '🧠',
+  Festaioli: '🎉',
+  Dormiglioni: '💤',
+}
+
+export const TEAM_SLOGAN: Record<Team, string> = {
+  Vip: 'Classe, stile e nessun compromesso',
+  Intellettuali: 'La cultura è la nostra arma',
+  Festaioli: 'Se c\'è musica, ci siamo noi',
+  Dormiglioni: 'Dormiamo, ma quando ci svegliamo…',
+}
+
+export const TEAM_SUBTITLE: Record<Team, string> = {
+  Vip: 'I Vip',
+  Intellettuali: 'Gli Intellettuali',
+  Festaioli: 'I Festaioli',
+  Dormiglioni: 'I Dormiglioni',
+}
+
+/** Matchup pairs for the show — first team vs second team */
+export const MATCHUPS: [Team, Team][] = [
+  ['Vip', 'Intellettuali'],
+  ['Festaioli', 'Dormiglioni'],
+]
+
 export const LOGIC_TOTAL_STEPS = 14
 
 export interface LogicQuestion {
@@ -595,6 +622,11 @@ export interface GameState {
   musicaPlaying: boolean
   /** Admin audio player volume (0–1) */
   musicaVolume: number
+  /**
+   * Intro reveal step: how many teams have been shown on the intro screen.
+   * 0 = only title shown, 1-4 = teams revealed one by one via admin button.
+   */
+  introRevealStep: number
 }
 
 export const STORAGE_KEY = 'battleNightState'
@@ -632,5 +664,6 @@ export function createInitialState(): GameState {
     musicaRevealed: false,
     musicaPlaying: false,
     musicaVolume: 0.8,
+    introRevealStep: 0,
   }
 }

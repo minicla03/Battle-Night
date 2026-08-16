@@ -11,6 +11,7 @@ import {
   PHASE_LABELS,
   PHASES,
   TEAMS,
+  TEAM_EMOJI,
   TEAM_TOKENS,
 } from '@/lib/battle-night/types'
 import {
@@ -29,6 +30,7 @@ import {
   RotateCcw,
   Scissors,
   Shuffle,
+  Sparkles,
   Square,
   Timer,
   Trophy,
@@ -172,7 +174,72 @@ export function AdminControls({ ctrl }: { ctrl: Controller }) {
         </div>
       </ControlPanel>
 
-      {/* 2 — Timer (globale) */}
+      {/* 1b — Intro: presentazione squadre */}
+      {state.currentPhase === 'INTRO' && (
+        <ControlPanel
+          title="Intro – Presentazione Squadre"
+          icon={<Sparkles className="h-4 w-4" />}
+          className="xl:col-span-2"
+        >
+          <div className="flex flex-col gap-3">
+            {/* Progress indicator */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                Squadre rivelate:
+              </span>
+              <div className="flex gap-1.5">
+                {TEAMS.map((team, i) => (
+                  <span
+                    key={team}
+                    className="rounded-full px-2.5 py-0.5 text-xs font-bold transition-all duration-300"
+                    style={{
+                      background: i < state.introRevealStep
+                        ? `color-mix(in oklch, var(--color-${TEAM_TOKENS[team]}) 25%, transparent)`
+                        : 'color-mix(in oklch, var(--color-border) 40%, transparent)',
+                      color: i < state.introRevealStep
+                        ? `var(--color-${TEAM_TOKENS[team]})`
+                        : 'var(--color-muted-foreground)',
+                      borderWidth: '1px',
+                      borderStyle: 'solid',
+                      borderColor: i < state.introRevealStep
+                        ? `color-mix(in oklch, var(--color-${TEAM_TOKENS[team]}) 50%, transparent)`
+                        : 'transparent',
+                    }}
+                  >
+                    {TEAM_EMOJI[team]} {team}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Main action buttons */}
+            <div className="flex flex-wrap gap-2">
+              <ControlButton
+                variant="primary"
+                disabled={state.introRevealStep >= TEAMS.length}
+                onClick={ctrl.revealNextIntroTeam}
+              >
+                <Sparkles className="h-4 w-4" />
+                {state.introRevealStep === 0
+                  ? 'Presenta prima squadra'
+                  : state.introRevealStep >= TEAMS.length
+                    ? 'Tutte rivelate ✓'
+                    : `Rivela ${TEAMS[state.introRevealStep]}`
+                }
+              </ControlButton>
+              <ControlButton
+                variant="ghost"
+                size="sm"
+                disabled={state.introRevealStep === 0}
+                onClick={ctrl.resetIntroReveal}
+              >
+                <RotateCcw className="h-3 w-3" /> Reset
+              </ControlButton>
+            </div>
+          </div>
+        </ControlPanel>
+      )}
+
       <ControlPanel title="Timer" icon={<Timer className="h-4 w-4" />}>
         <div className="flex items-center justify-between">
           <span className="font-display text-4xl font-bold tabular-nums text-accent">

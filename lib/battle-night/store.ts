@@ -9,6 +9,7 @@ import {
   INTESA_WORD_POOL,
   LOGIC_TOTAL_STEPS,
   PHASES,
+  TEAMS,
   shuffleArray,
   STORAGE_KEY,
   type GameState,
@@ -274,6 +275,17 @@ export function useGameController() {
 
   const resetGame = useCallback(() => commit(createInitialState()), [commit])
 
+  // --- Intro reveal controls ---
+  const revealNextIntroTeam = useCallback(() => {
+    const next = Math.min(TEAMS.length, stateRef.current.introRevealStep + 1)
+    update({ introRevealStep: next })
+  }, [update])
+
+  const resetIntroReveal = useCallback(
+    () => update({ introRevealStep: 0 }),
+    [update],
+  )
+
   return {
     state,
     hydrated,
@@ -305,5 +317,7 @@ export function useGameController() {
     pauseMusica,
     setMusicaVolume,
     resetGame,
+    revealNextIntroTeam,
+    resetIntroReveal,
   }
 }

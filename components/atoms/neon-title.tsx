@@ -7,6 +7,7 @@ interface NeonTitleProps {
   as?: 'h1' | 'h2' | 'h3' | 'p' | 'span'
   color?: NeonColor
   className?: string
+  style?: React.CSSProperties
 }
 
 const colorClasses: Record<NeonColor, string> = {
@@ -20,6 +21,7 @@ export function NeonTitle({
   as: Tag = 'h2',
   color = 'primary',
   className,
+  style,
 }: NeonTitleProps) {
   return (
     <Tag
@@ -28,6 +30,7 @@ export function NeonTitle({
         colorClasses[color],
         className,
       )}
+      style={style}
     >
       {children}
     </Tag>

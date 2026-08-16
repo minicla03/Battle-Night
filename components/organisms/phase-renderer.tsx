@@ -14,7 +14,7 @@ export function PhaseRenderer({ state }: { state: GameState }) {
 
   switch (state.currentPhase) {
     case 'INTRO':
-      content = <IntroBoard />
+      content = <IntroBoard introRevealStep={state.introRevealStep} />
       break
     case 'TEAMS':
       content = <TeamsBoard scores={state.scores} />
@@ -70,7 +70,7 @@ export function PhaseRenderer({ state }: { state: GameState }) {
       )
       break
     default:
-      content = <IntroBoard />
+      content = <IntroBoard introRevealStep={state.introRevealStep} />
   }
 
   return <div className="flex h-full w-full items-center justify-center">{content}</div>
